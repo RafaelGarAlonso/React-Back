@@ -1,20 +1,104 @@
 /*=============================================>>>>>
 = IMPORTACIONES =
 ===============================================>>>>>*/
-//Importa funcionalidad EXpress
 var express = require('express');
-//BCRYPT para hashear passwords
 const bcrypt = require('bcrypt');
-//Implementación TOKENS
 const jwt = require('jsonwebtoken');
-//SEED Parametrizado como constante
-var SEED = require('../config/config').SEED;
-
-//EJECUCION
 var app = express();
 
-//Modelo del esquema del usuario
+var SEED = require('../config/config').SEED;
+
+//Google
+var CLIENT_ID = require('../config/config').CLIENT_ID;
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client(CLIENT_ID);
+
 var Usuario = require('../models/usuario');
+
+/*=============================================>>>>>
+= Autenticacion mediante Google =
+===============================================>>>>>*/
+async function verify(token) {
+  const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  return {
+    nombre:payload.name,
+    email:payload.email,
+    img:payload.picture,
+    google:true
+  }
+}
+
+app.post('/google', async(req,res) =>{
+  var token = req.body.token;
+
+  var googleUser = await verify(token)
+    .catch(e => {
+      return res.status(403).json({
+        ok:false,
+        mensaje: 'Token no valido'
+      });
+    });
+
+  Usuario.findOne( { email:googleUser.email }, (err, usuarioBBDD) =>{
+    if(err){
+      return res.status(500).json({
+        ok:false,
+        mensaje: 'Error al buscar usuario',
+        errors:err
+      });
+    }
+    if(usuarioBBDD){
+      if(usuarioBBDD.google === false){
+        return res.status(400).json({
+          ok:false,
+          mensaje: 'Debe de utilizar su autenticacion por defecto'
+        });
+      }else{
+        var token = jwt.sign({ usuario:usuarioBBDD}, SEED, { expiresIn:14400 })
+
+        res.status(200).json({
+          ok: true,
+          usuario: usuarioBBDD,
+          token:token,
+          id:usuarioBBDD._id
+        })
+      }
+    }else{
+      //El usuario no existe, hay que crearlo
+      var usuario = new Usuario();
+      usuario.nombre = googleUser.nombre;
+      usuario.email = googleUser.email;
+      usuario.img = googleUser.img;
+      usuario.google = true;
+      usuario.password = ':)';
+
+      usuario.save( (err, usuarioBBDD ) =>{
+        var token = jwt.sign({ usuario:usuarioBBDD}, SEED, { expiresIn:14400 })
+
+        res.status(200).json({
+          ok: true,
+          usuario: usuarioBBDD,
+          token:token,
+          id:usuarioBBDD._id
+        })
+      })
+    }
+  });
+
+  // return res.status(200).json({
+  //   ok: true,
+  //   mensake:'OK',
+  //   googleUser:googleUser
+  // });
+})
+
+/*=============================================>>>>>
+= Autenticacion normal =
+===============================================>>>>>*/
 
 app.post('/', ( req, res ) =>{
 
@@ -45,7 +129,7 @@ app.post('/', ( req, res ) =>{
 
     //Generar TOKEN
     usuarioBBDD.password = ':)';
-    var token = jwt.sign({ usuario:usuarioBBDD}, SEED, { expiresIn:14400 }) // expiracion en 4 horas
+    var token = jwt.sign({ usuario:usuarioBBDD}, SEED, { expiresIn:14400 })
 
     res.status(200).json({
       ok: true,
