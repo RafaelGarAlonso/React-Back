@@ -20,7 +20,13 @@ var Usuario = require('../models/usuario');
 = Obtener todos los usuarios =
 ===============================================>>>>>*/
 app.get('/', (req, res, next) => {
+
+  var pagDesde = req.query.pagDesde || 0;
+  pagDesde = Number(pagDesde);
+
   Usuario.find({}, 'nombre email img role')
+  .skip(pagDesde)
+  .limit(5)
     .exec(
       (err, usuarios) => {
         if (err) {
@@ -31,10 +37,14 @@ app.get('/', (req, res, next) => {
           });
         }
 
-        res.status(200).json({
-          ok: true,
-          usuarios: usuarios
+        Usuario.countDocuments({}, (err, conteo)=>{
+          res.status(200).json({
+            ok: true,
+            usuarios: usuarios,
+            total:conteo
+          })
         })
+
       })
 });
 
