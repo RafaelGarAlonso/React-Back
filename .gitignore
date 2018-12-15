@@ -1,3 +1,4 @@
 # dependencies
 /node_modules
 /google-sign-demo/node_modules/
+.package-lock.json
