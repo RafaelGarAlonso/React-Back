@@ -21,11 +21,11 @@ var Usuario = require('../models/usuario');
 ===============================================>>>>>*/
 app.get('/', (req, res, next) => {
 
-  var pagDesde = req.query.pagDesde || 0;
-  pagDesde = Number(pagDesde);
+  var desde = req.query.desde || 0;
+  desde = Number(desde);
 
-  Usuario.find({}, 'nombre email img role')
-  .skip(pagDesde)
+  Usuario.find({}, 'nombre email img role google')
+  .skip(desde)
   .limit(5)
     .exec(
       (err, usuarios) => {
