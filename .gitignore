@@ -1,4 +1,3 @@
 # dependencies
-/node_modules
-/google-sign-demo/node_modules/
+*node_modules*
 *package-lock*
