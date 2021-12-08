@@ -1,43 +1,29 @@
-// Requires
-var express = require('express');
-var bodyParser = require('body-parser');
+require('dotenv').config();
 
-var mongoose = require('mongoose');
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useCreateIndex', true);
+const express = require('express');
+const cors = require('cors');
 
-// Inicializar variables
-var app = express();
+const { dbConnection } = require('./database/config');
 
-// CORS
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header('Access-Control-Allow-Methods','POST, GET, PUT, DELETE, OPTIONS');
-  next();
-});
+// Crear el servidor de express
+const app = express();
 
+// Configurar CORS
+app.use( cors() );
 
-// Body Parser
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
-app.use(express.bodyParser());
+// Lectura y parseo del body
+app.use( express.json() );
 
-// Importar Rutas
-var usuarioRoutes = require('./routes/usuario');
-var loginRoutes = require('./routes/login');
+// Base de datos
+dbConnection();
 
-//Conexion BBDD
-mongoose.connection.openUri('mongodb://localhost:27017/react', ( err, res ) => {
-  if (err) throw err;
-  console.log('BBDD: \x1b[32m%s\x1b[0m', 'online')
-});
+// Directorio público
+app.use( express.static('public') );
 
 // Rutas
-app.use('/login', loginRoutes);
-app.use('/usuario', usuarioRoutes);
+app.use( '/api/login', require('./routes/auth') );
+app.use( '/api/usuarios', require('./routes/usuarios') );
 
-// Escuchar peticiones
-app.listen(3000, ()=>{
-  console.log('Express ejecutadose, port 3000: \x1b[32m%s\x1b[0m', 'online')
-})
+app.listen( process.env.PORT, () => {
+  console.log('Servidor corriendo en puerto ' + process.env.PORT );
+});
