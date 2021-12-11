@@ -4,54 +4,72 @@ const Usuario = require('../models/usuario');
 const { generarJWT } = require('../helpers/jwt');
 
 const login = async( req, res = response ) => {
-
     const { email, password } = req.body;
-
     try {
-        
-        // Verificar email
+        // Verify email
         const usuarioDB = await Usuario.findOne({ email });
-
         if ( !usuarioDB ) {
-            return res.status(404).json({
+            return res.status(400).json({
                 ok: false,
-                msg: 'Email no encontrado'
+                msg: 'Usuario o contraseña incorrecta'
             });
         }
-
-        // Verificar contraseña
+        // Verify Password
         const validPassword = bcrypt.compareSync( password, usuarioDB.password );
         if ( !validPassword ) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Contraseña no válida'
+                msg: 'Usuario o contraseña incorrecta'
             });
         }
-
-        // Generar el TOKEN - JWT
+        // Generate token (JWT)
         const token = await generarJWT( usuarioDB.id );
-
         res.json({
             ok: true,
-            token
-        })
+            id: usuarioDB.id,
+            token,
+            name: usuarioDB.name,
+            menu: buildMenu(usuarioDB.role),
+        });
     } catch (error) {
-        console.log(error);
         res.status(500).json({
             ok: false,
-            msg: 'Hable con el administrador'
-        })
+            msg: 'Error en el servicio'
+        });
     }
 }
 
 const renewToken = async(req, res = response) => {
     const uid = req.uid;
-    // Generar el TOKEN - JWT
+    // Generate token (JWT)
     const token = await generarJWT( uid );
     res.json({
         ok: true,
         token
     });
+}
+
+function buildMenu(ROLE) {
+    const ADMIN_MENU = {
+        title: 'ADMIN',
+        submenu: [
+            { title: 'Dashboard', url:'/dashboard' },
+            { title: 'Perfil', url:'/perfil' },
+            { title: 'Pacientes', url:'/pacientes' },
+            { title: 'Citas', url:'/citas' },
+            { title: 'Estadísticas', url:'/estadisticas' }
+        ]
+    }
+    const USER_MENU = {
+        title: 'USER',
+        submenu: [
+            { title: 'Dashboard', url:'/dashboard' },
+            { title: 'Perfil', url:'/perfil' },
+            { title: 'Asignar médico', url:'/medico' },
+            { title: 'Citas', url:'/citas' }
+        ]
+    }
+    return ROLE === 'ADMIN' ? ADMIN_MENU : USER_MENU;
 }
 
 module.exports = {
