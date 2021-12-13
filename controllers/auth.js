@@ -1,35 +1,72 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
-const Usuario = require('../models/usuario');
+const Medico = require('../models/medico');
+const Paciente = require('../models/paciente');
 const { generarJWT } = require('../helpers/jwt');
 
-const login = async( req, res = response ) => {
+const medicoLogin = async( req, res = response ) => {
     const { email, password } = req.body;
     try {
-        // Verify email
-        const usuarioDB = await Usuario.findOne({ email });
-        if ( !usuarioDB ) {
+
+        const medicoDB = await Medico.findOne({ email });
+        if ( !medicoDB ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Usuario o contraseña incorrecta'
             });
         }
-        // Verify Password
-        const validPassword = bcrypt.compareSync( password, usuarioDB.password );
+
+        const validPassword = bcrypt.compareSync( password, medicoDB.password );
         if ( !validPassword ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Usuario o contraseña incorrecta'
             });
         }
-        // Generate token (JWT)
-        const token = await generarJWT( usuarioDB.id );
+
+        const token = await generarJWT( medicoDB.id );
         res.json({
             ok: true,
-            id: usuarioDB.id,
+            id: medicoDB.id,
             token,
-            name: usuarioDB.name,
-            menu: buildMenu(usuarioDB.role),
+            name: medicoDB.name,
+            menu: buildMenu(medicoDB.role),
+        });
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: 'Error en el servicio'
+        });
+    }
+}
+
+const pacienteLogin = async( req, res = response ) => {
+    const { email, password } = req.body;
+    try {
+
+        const pacienteDB = await Paciente.findOne({ email });
+        if ( !pacienteDB ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario o contraseña incorrecta'
+            });
+        }
+
+        const validPassword = bcrypt.compareSync( password, pacienteDB.password );
+        if ( !validPassword ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario o contraseña incorrecta'
+            });
+        }
+
+        const token = await generarJWT( pacienteDB.id );
+        res.json({
+            ok: true,
+            id: pacienteDB.id,
+            token,
+            name: pacienteDB.name,
+            menu: buildMenu(pacienteDB.role),
         });
     } catch (error) {
         res.status(500).json({
@@ -41,7 +78,6 @@ const login = async( req, res = response ) => {
 
 const renewToken = async(req, res = response) => {
     const uid = req.uid;
-    // Generate token (JWT)
     const token = await generarJWT( uid );
     res.json({
         ok: true,
@@ -73,6 +109,7 @@ function buildMenu(ROLE) {
 }
 
 module.exports = {
-    login,
+    medicoLogin,
+    pacienteLogin,
     renewToken
 }

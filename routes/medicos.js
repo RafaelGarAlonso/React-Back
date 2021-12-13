@@ -1,14 +1,11 @@
-/*
-    Ruta: /api/usuarios
-*/
 const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
-const { getUsuarios, crearUsuario, actualizarUsuario, borrarUsuario } = require('../controllers/usuarios');
+const { getMedicos, crearMedico, actualizarMedico, borrarMedico } = require('../controllers/medicos');
 const { validarJWT } = require('../middlewares/validar-jwt');
 const router = Router();
 
-router.get( '/', validarJWT , getUsuarios );
+router.get( '/', validarJWT , getMedicos );
 
 router.post( '/',
     [
@@ -17,7 +14,7 @@ router.post( '/',
         check('email', 'El email es obligatorio').isEmail(),
         validarCampos,
     ], 
-    crearUsuario 
+    crearMedico 
 );
 
 router.put( '/:id',
@@ -28,12 +25,12 @@ router.put( '/:id',
         check('role', 'El role es obligatorio').not().isEmpty(),
         validarCampos,
     ],
-    actualizarUsuario
+    actualizarMedico
 );
 
 router.delete( '/:id',
     validarJWT,
-    borrarUsuario
+    borrarMedico
 );
 
 module.exports = router;
