@@ -4,21 +4,24 @@ const Medico = require('../models/medico');
 const { generarJWT } = require('../helpers/jwt');
 
 const getMedicos = async(req, res) => {
-    const desde = Number(req.query.desde) || 0;
-    const limite = Number(req.query.limit) || 5;
+    const from = Number(req.query.from);
+    const limit = Number(req.query.limit);
+
     const [ medicos, total ] = await Promise.all([
         Medico
-            .find({}, 'name email img role')
-            .skip( desde )
-            .limit( limite ),
+            .find({}, 'name email role surname gender address province')
+            .skip( from )
+            .limit( limit ),
             Medico.countDocuments()
     ]);
 
-    res.json({
-        ok: true,
-        medicos,
-        total
-    });   
+    setTimeout(function() {
+        res.json({
+            ok: true,
+            medicos,
+            total
+        });
+    }, 1000);
 }
 
 const crearMedico = async(req, res = response) => {
@@ -41,11 +44,13 @@ const crearMedico = async(req, res = response) => {
 
         const token = await generarJWT( medico.id );
 
-        res.json({
-            ok: true,
-            medico,
-            token
-        });
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                medico,
+                token
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -54,9 +59,10 @@ const crearMedico = async(req, res = response) => {
     }
 }
 
-
 const actualizarMedico = async (req, res = response) => {
     const uid = req.params.id;
+    const { email, ...campos } = req.body;
+
     try {
         const medicoDB = await Medico.findById( uid );
 
@@ -67,7 +73,6 @@ const actualizarMedico = async (req, res = response) => {
             });
         }
 
-        const { password, email, ...campos } = req.body;
         if ( medicoDB.email !== email ) {
             const existeEmail = await Medico.findOne({ email });
             if ( existeEmail ) {
@@ -80,10 +85,12 @@ const actualizarMedico = async (req, res = response) => {
         campos.email = email;
         const medicoActualizado = await Medico.findByIdAndUpdate( uid, campos, { new: true } );
 
-        res.json({
-            ok: true,
-            usuario: medicoActualizado
-        });
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                medico: medicoActualizado
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -91,7 +98,6 @@ const actualizarMedico = async (req, res = response) => {
         })
     }
 }
-
 
 const borrarMedico = async(req, res = response ) => {
     const uid = req.params.id;
@@ -105,10 +111,12 @@ const borrarMedico = async(req, res = response ) => {
         }
 
         await Medico.findByIdAndDelete( uid );
-        res.json({
-            ok: true,
-            msg: 'Médico eliminado'
-        });
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                msg: 'Médico eliminado'
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -116,8 +124,6 @@ const borrarMedico = async(req, res = response ) => {
         });
     }
 }
-
-
 
 module.exports = {
     getMedicos,

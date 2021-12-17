@@ -4,21 +4,23 @@ const Paciente = require('../models/paciente');
 const { generarJWT } = require('../helpers/jwt');
 
 const getPacientes = async(req, res) => {
-    const desde = Number(req.query.desde) || 0;
-    const limite = Number(req.query.limit) || 5;
+    const from = Number(req.query.from);
+    const limit = Number(req.query.limit);
     const [ pacientes, total ] = await Promise.all([
         Paciente
-            .find({}, 'name email img role')
-            .skip( desde )
-            .limit( limite ),
-        Usuario.countDocuments()
+            .find({}, 'name surname email gender address province role')
+            .skip( from )
+            .limit( limit ),
+            Paciente.countDocuments()
     ]);
 
-    res.json({
-        ok: true,
-        pacientes,
-        total
-    });   
+    setTimeout(function() {
+        res.json({
+            ok: true,
+            pacientes,
+            total
+        });
+    }, 1000);
 }
 
 const crearPaciente = async(req, res = response) => {
@@ -41,11 +43,13 @@ const crearPaciente = async(req, res = response) => {
 
         const token = await generarJWT( paciente.id );
 
-        res.json({
-            ok: true,
-            paciente,
-            token
-        });
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                paciente,
+                token
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -54,9 +58,10 @@ const crearPaciente = async(req, res = response) => {
     }
 }
 
-
 const actualizarPaciente = async (req, res = response) => {
     const uid = req.params.id;
+    const { email, ...campos } = req.body;
+
     try {
         const pacienteDB = await Paciente.findById( uid );
 
@@ -67,7 +72,6 @@ const actualizarPaciente = async (req, res = response) => {
             });
         }
 
-        const { password, email, ...campos } = req.body;
         if ( pacienteDB.email !== email ) {
             const existeEmail = await Paciente.findOne({ email });
             if ( existeEmail ) {
@@ -80,10 +84,12 @@ const actualizarPaciente = async (req, res = response) => {
         campos.email = email;
         const pacienteActualizado = await Paciente.findByIdAndUpdate( uid, campos, { new: true } );
 
-        res.json({
-            ok: true,
-            usuario: pacienteActualizado
-        });
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                paciente: pacienteActualizado
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -91,7 +97,6 @@ const actualizarPaciente = async (req, res = response) => {
         })
     }
 }
-
 
 const borrarPaciente = async(req, res = response ) => {
     const uid = req.params.id;
@@ -105,10 +110,14 @@ const borrarPaciente = async(req, res = response ) => {
         }
 
         await Paciente.findByIdAndDelete( uid );
-        res.json({
-            ok: true,
-            msg: 'Paciente eliminado'
-        });
+
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                msg: 'Paciente eliminado'
+            });
+        }, 1000);
+
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -116,8 +125,6 @@ const borrarPaciente = async(req, res = response ) => {
         });
     }
 }
-
-
 
 module.exports = {
     getPacientes,

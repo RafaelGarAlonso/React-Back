@@ -25,13 +25,17 @@ const medicoLogin = async( req, res = response ) => {
         }
 
         const token = await generarJWT( medicoDB.id );
-        res.json({
-            ok: true,
-            id: medicoDB.id,
-            token,
-            name: medicoDB.name,
-            menu: buildMenu(medicoDB.role),
-        });
+
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                id: medicoDB.id,
+                token,
+                role: medicoDB.role,
+                name: medicoDB.name,
+                menu: buildMenu(medicoDB.role),
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -61,13 +65,17 @@ const pacienteLogin = async( req, res = response ) => {
         }
 
         const token = await generarJWT( pacienteDB.id );
-        res.json({
-            ok: true,
-            id: pacienteDB.id,
-            token,
-            name: pacienteDB.name,
-            menu: buildMenu(pacienteDB.role),
-        });
+
+        setTimeout(function() {
+            res.json({
+                ok: true,
+                id: pacienteDB.id,
+                token,
+                role: pacienteDB.role,
+                name: pacienteDB.name,
+                menu: buildMenu(pacienteDB.role),
+            });
+        }, 1000);
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -79,32 +87,28 @@ const pacienteLogin = async( req, res = response ) => {
 const renewToken = async(req, res = response) => {
     const uid = req.uid;
     const token = await generarJWT( uid );
-    res.json({
-        ok: true,
-        token
-    });
+    setTimeout(function() {
+        res.json({
+            ok: true,
+            token
+        });
+    }, 1000);
 }
 
 function buildMenu(ROLE) {
-    const ADMIN_MENU = {
-        title: 'ADMIN',
-        submenu: [
-            { title: 'Dashboard', url:'/dashboard' },
-            { title: 'Perfil', url:'/perfil' },
-            { title: 'Pacientes', url:'/pacientes' },
-            { title: 'Citas', url:'/citas' },
-            { title: 'Estadísticas', url:'/estadisticas' }
-        ]
-    }
-    const USER_MENU = {
-        title: 'USER',
-        submenu: [
-            { title: 'Dashboard', url:'/dashboard' },
-            { title: 'Perfil', url:'/perfil' },
-            { title: 'Asignar médico', url:'/medico' },
-            { title: 'Citas', url:'/citas' }
-        ]
-    }
+    const ADMIN_MENU = [
+        { title: 'Dashboard', url:'/dashboard' },
+        { title: 'Perfil', url:'/perfil' },
+        { title: 'Pacientes', url:'/pacientes' },
+        { title: 'Citas', url:'/citas' }
+    ]
+
+    const USER_MENU = [
+        { title: 'Dashboard', url:'/dashboard' },
+        { title: 'Perfil', url:'/perfil' },
+        { title: 'Asignar médico', url:'/medico' },
+        { title: 'Citas', url:'/citas' }
+    ]
     return ROLE === 'ADMIN' ? ADMIN_MENU : USER_MENU;
 }
 

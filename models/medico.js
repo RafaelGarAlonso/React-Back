@@ -5,21 +5,33 @@ const MedicoSchema = Schema({
         type: String,
         required: true
     },
+    surname: {
+        type: String,
+        default: ''
+    },
     email: {
         type: String,
         required: true,
         unique: true
     },
+    gender: {
+        type: String,
+        default: ''
+    },
+    address: {
+        type: String,
+        default: ''
+    },
+    province: {
+        type: String,
+        default: ''
+    },
     password: {
         type: String,
         required: true,
     },
-    img: {
-        type: String,
-    },
     role: {
         type: String,
-        required: true,
         default: 'ADMIN'
     }
 });
