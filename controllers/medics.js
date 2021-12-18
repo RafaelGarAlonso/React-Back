@@ -88,7 +88,7 @@ const updateMedic = async (req, res = response) => {
         setTimeout(function() {
             res.json({
                 ok: true,
-                medico: medicUpdated
+                medic: medicUpdated
             });
         }, 1000);
 
@@ -107,7 +107,7 @@ const deleteMedic = async(req, res = response ) => {
         if ( !medicDB ) {
             return res.status(400).json({
                 ok: false,
-                msg: 'No se encontró un paciente con ese ID'
+                msg: 'No se encontró un médico con ese ID'
             });
         }
 
