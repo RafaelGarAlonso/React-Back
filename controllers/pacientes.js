@@ -8,7 +8,7 @@ const getPacientes = async(req, res) => {
     const limit = Number(req.query.limit);
     const [ pacientes, total ] = await Promise.all([
         Paciente
-            .find({}, 'name surname email gender address province role')
+            .find({}, 'name surname email gender address province role medicAssigned appointment')
             .skip( from )
             .limit( limit ),
             Paciente.countDocuments()

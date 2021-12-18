@@ -33,6 +33,14 @@ const PacienteSchema = Schema({
     role: {
         type: String,
         default: 'USER'
+    },
+    medicAssigned: {
+        type: String,
+        default: ''
+    },
+    appointment: {
+        type: Object,
+        default: {}
     }
 });
 

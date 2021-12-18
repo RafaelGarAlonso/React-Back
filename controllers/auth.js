@@ -29,10 +29,15 @@ const medicoLogin = async( req, res = response ) => {
         setTimeout(function() {
             res.json({
                 ok: true,
-                id: medicoDB.id,
+                uid: medicoDB.id,
                 token,
                 role: medicoDB.role,
+                email: medicoDB.email,
                 name: medicoDB.name,
+                surname: medicoDB.surname,
+                address: medicoDB.address,
+                province: medicoDB.province,
+                gender: medicoDB.gender,
                 menu: buildMenu(medicoDB.role),
             });
         }, 1000);
@@ -65,14 +70,22 @@ const pacienteLogin = async( req, res = response ) => {
         }
 
         const token = await generarJWT( pacienteDB.id );
+        console.log('pacienteDB', pacienteDB)
 
         setTimeout(function() {
             res.json({
                 ok: true,
-                id: pacienteDB.id,
+                uid: pacienteDB.id,
                 token,
+                email: pacienteDB.email,
                 role: pacienteDB.role,
                 name: pacienteDB.name,
+                surname: pacienteDB.surname,
+                address: pacienteDB.address,
+                province: pacienteDB.province,
+                gender: pacienteDB.gender,
+                medicAssigned: pacienteDB.medicAssigned,
+                appointment: pacienteDB.appointment,
                 menu: buildMenu(pacienteDB.role),
             });
         }, 1000);
@@ -100,14 +113,14 @@ function buildMenu(ROLE) {
         { title: 'Dashboard', url:'/dashboard' },
         { title: 'Perfil', url:'/perfil' },
         { title: 'Pacientes', url:'/pacientes' },
-        { title: 'Citas', url:'/citas' }
+        { title: 'Consultar citas', url:'/consultar-citas' }
     ]
 
     const USER_MENU = [
         { title: 'Dashboard', url:'/dashboard' },
         { title: 'Perfil', url:'/perfil' },
-        { title: 'Asignar médico', url:'/medico' },
-        { title: 'Citas', url:'/citas' }
+        { title: 'Asignar médico', url:'/asignar-medico' },
+        { title: 'Solicitar cita', url:'/solicitar-cita' }
     ]
     return ROLE === 'ADMIN' ? ADMIN_MENU : USER_MENU;
 }
