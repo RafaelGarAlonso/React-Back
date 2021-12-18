@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const generarJWT = ( uid ) => {
+const generateJWT = ( uid ) => {
     return new Promise( ( resolve, reject ) => {
         const payload = {
             uid,
@@ -19,5 +19,5 @@ const generarJWT = ( uid ) => {
 }
 
 module.exports = {
-    generarJWT,
+    generateJWT
 }

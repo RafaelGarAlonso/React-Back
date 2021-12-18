@@ -1,32 +1,25 @@
 const { Router } = require('express');
-const { medicoLogin, pacienteLogin, renewToken } = require('../controllers/auth');
+const { medicLogin, patientLogin } = require('../controllers/auth');
 const { check } = require('express-validator');
-const { validarCampos } = require('../middlewares/validar-campos');
-const { validarJWT } = require('../middlewares/validar-jwt');
-
+const { validateFields } = require('../middlewares/validate-fields');
 const router = Router();
 
-router.post( '/medico',
+router.post( '/medic',
     [
         check('email', 'El email es obligatorio').isEmail(),
         check('password', 'El password es obligatorio').not().isEmpty(),
-        validarCampos
+        validateFields
     ],
-    medicoLogin
+    medicLogin
 );
 
-router.post( '/paciente',
+router.post( '/patient',
     [
         check('email', 'El email es obligatorio').isEmail(),
         check('password', 'El password es obligatorio').not().isEmpty(),
-        validarCampos
+        validateFields
     ],
-    pacienteLogin
+    patientLogin
 );
-
-router.get( '/renew',
-    validarJWT,
-    renewToken
-)
 
 module.exports = router;

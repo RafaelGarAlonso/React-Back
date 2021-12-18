@@ -1,53 +1,52 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
-const Medico = require('../models/medico');
-const { generarJWT } = require('../helpers/jwt');
+const Patient = require('../models/patients');
+const { generateJWT } = require('../helpers/jwt');
 
-const getMedicos = async(req, res) => {
+const getPatient = async(req, res) => {
     const from = Number(req.query.from);
     const limit = Number(req.query.limit);
-
-    const [ medicos, total ] = await Promise.all([
-        Medico
-            .find({}, 'name email role surname gender address province')
+    const [ patients, total ] = await Promise.all([
+        Patient
+            .find({}, 'name surname email gender address province role medicAssigned appointment')
             .skip( from )
             .limit( limit ),
-            Medico.countDocuments()
+            Patient.countDocuments()
     ]);
 
     setTimeout(function() {
         res.json({
             ok: true,
-            medicos,
+            patients,
             total
         });
     }, 1000);
 }
 
-const crearMedico = async(req, res = response) => {
+const createPatient = async(req, res = response) => {
     const { email, password } = req.body;
     try {
-        const existeEmail = await Medico.findOne({ email });
-        if ( existeEmail ) {
+        const emailExist = await Patient.findOne({ email });
+        if ( emailExist ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'El correo ya está registrado'
             });
         }
 
-        const medico = new Medico( req.body );
+        const patient = new Patient( req.body );
     
         const salt = bcrypt.genSaltSync();
-        medico.password = bcrypt.hashSync( password, salt );
+        patient.password = bcrypt.hashSync( password, salt );
     
-        await medico.save();
+        await patient.save();
 
-        const token = await generarJWT( medico.id );
+        const token = await generateJWT( patient.id );
 
         setTimeout(function() {
             res.json({
                 ok: true,
-                medico,
+                patient,
                 token
             });
         }, 1000);
@@ -59,36 +58,36 @@ const crearMedico = async(req, res = response) => {
     }
 }
 
-const actualizarMedico = async (req, res = response) => {
+const updatePatient = async (req, res = response) => {
     const uid = req.params.id;
-    const { email, ...campos } = req.body;
+    const { email, ...fields } = req.body;
 
     try {
-        const medicoDB = await Medico.findById( uid );
+        const patientDB = await Patient.findById( uid );
 
-        if ( !medicoDB ) {
+        if ( !patientDB ) {
             return res.status(404).json({
                 ok: false,
-                msg: 'No se encontró un médico con ese ID'
+                msg: 'No se encontró un paciente con ese ID'
             });
         }
 
-        if ( medicoDB.email !== email ) {
-            const existeEmail = await Medico.findOne({ email });
-            if ( existeEmail ) {
+        if ( patientDB.email !== email ) {
+            const emailExist = await Patient.findOne({ email });
+            if ( emailExist ) {
                 return res.status(400).json({
                     ok: false,
-                    msg: 'Ya existe un médico con ese email'
+                    msg: 'Ya existe un paciente con ese email'
                 });
             }
         }
-        campos.email = email;
-        const medicoActualizado = await Medico.findByIdAndUpdate( uid, campos, { new: true } );
+        fields.email = email;
+        const patientUpdated = await Patient.findByIdAndUpdate( uid, fields, { new: true } );
 
         setTimeout(function() {
             res.json({
                 ok: true,
-                medico: medicoActualizado
+                patient: patientUpdated
             });
         }, 1000);
     } catch (error) {
@@ -99,24 +98,26 @@ const actualizarMedico = async (req, res = response) => {
     }
 }
 
-const borrarMedico = async(req, res = response ) => {
+const deletePatient = async(req, res = response ) => {
     const uid = req.params.id;
     try {
-        const medicoDB = await Medico.findById( uid );
-        if ( !medicoDB ) {
+        const patientDB = await Patient.findById( uid );
+        if ( !patientDB ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'No se encontró un paciente con ese ID'
             });
         }
 
-        await Medico.findByIdAndDelete( uid );
+        await Patient.findByIdAndDelete( uid );
+
         setTimeout(function() {
             res.json({
                 ok: true,
-                msg: 'Médico eliminado'
+                msg: 'Paciente eliminado'
             });
         }, 1000);
+
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -126,8 +127,8 @@ const borrarMedico = async(req, res = response ) => {
 }
 
 module.exports = {
-    getMedicos,
-    crearMedico,
-    actualizarMedico,
-    borrarMedico
+    getPatient,
+    createPatient,
+    updatePatient,
+    deletePatient
 }

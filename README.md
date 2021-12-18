@@ -9,3 +9,9 @@ de node usando el comando
 ```
 npm install
 ```
+
+Para levantar el servidor, usar el comando 
+
+```
+npm start
+```

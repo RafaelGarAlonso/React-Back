@@ -1,22 +1,22 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
-const Medico = require('../models/medico');
-const Paciente = require('../models/paciente');
-const { generarJWT } = require('../helpers/jwt');
+const Medic = require('../models/medics');
+const Patient = require('../models/patients');
+const { generateJWT } = require('../helpers/jwt');
 
-const medicoLogin = async( req, res = response ) => {
+const medicLogin = async( req, res = response ) => {
     const { email, password } = req.body;
     try {
 
-        const medicoDB = await Medico.findOne({ email });
-        if ( !medicoDB ) {
+        const medicDB = await Medic.findOne({ email });
+        if ( !medicDB ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Usuario o contraseña incorrecta'
             });
         }
 
-        const validPassword = bcrypt.compareSync( password, medicoDB.password );
+        const validPassword = bcrypt.compareSync( password, medicDB.password );
         if ( !validPassword ) {
             return res.status(400).json({
                 ok: false,
@@ -24,21 +24,21 @@ const medicoLogin = async( req, res = response ) => {
             });
         }
 
-        const token = await generarJWT( medicoDB.id );
+        const token = await generateJWT( medicDB.id );
 
         setTimeout(function() {
             res.json({
                 ok: true,
-                uid: medicoDB.id,
+                uid: medicDB.id,
                 token,
-                role: medicoDB.role,
-                email: medicoDB.email,
-                name: medicoDB.name,
-                surname: medicoDB.surname,
-                address: medicoDB.address,
-                province: medicoDB.province,
-                gender: medicoDB.gender,
-                menu: buildMenu(medicoDB.role),
+                role: medicDB.role,
+                email: medicDB.email,
+                name: medicDB.name,
+                surname: medicDB.surname,
+                address: medicDB.address,
+                province: medicDB.province,
+                gender: medicDB.gender,
+                menu: buildMenu(medicDB.role),
             });
         }, 1000);
     } catch (error) {
@@ -49,19 +49,19 @@ const medicoLogin = async( req, res = response ) => {
     }
 }
 
-const pacienteLogin = async( req, res = response ) => {
+const patientLogin = async( req, res = response ) => {
     const { email, password } = req.body;
     try {
 
-        const pacienteDB = await Paciente.findOne({ email });
-        if ( !pacienteDB ) {
+        const patientDB = await Patient.findOne({ email });
+        if ( !patientDB ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Usuario o contraseña incorrecta'
             });
         }
 
-        const validPassword = bcrypt.compareSync( password, pacienteDB.password );
+        const validPassword = bcrypt.compareSync( password, patientDB.password );
         if ( !validPassword ) {
             return res.status(400).json({
                 ok: false,
@@ -69,24 +69,23 @@ const pacienteLogin = async( req, res = response ) => {
             });
         }
 
-        const token = await generarJWT( pacienteDB.id );
-        console.log('pacienteDB', pacienteDB)
+        const token = await generateJWT( patientDB.id );
 
         setTimeout(function() {
             res.json({
                 ok: true,
-                uid: pacienteDB.id,
+                uid: patientDB.id,
                 token,
-                email: pacienteDB.email,
-                role: pacienteDB.role,
-                name: pacienteDB.name,
-                surname: pacienteDB.surname,
-                address: pacienteDB.address,
-                province: pacienteDB.province,
-                gender: pacienteDB.gender,
-                medicAssigned: pacienteDB.medicAssigned,
-                appointment: pacienteDB.appointment,
-                menu: buildMenu(pacienteDB.role),
+                email: patientDB.email,
+                role: patientDB.role,
+                name: patientDB.name,
+                surname: patientDB.surname,
+                address: patientDB.address,
+                province: patientDB.province,
+                gender: patientDB.gender,
+                medicAssigned: patientDB.medicAssigned,
+                appointment: patientDB.appointment,
+                menu: buildMenu(patientDB.role),
             });
         }, 1000);
     } catch (error) {
@@ -95,17 +94,6 @@ const pacienteLogin = async( req, res = response ) => {
             msg: 'Error en el servicio'
         });
     }
-}
-
-const renewToken = async(req, res = response) => {
-    const uid = req.uid;
-    const token = await generarJWT( uid );
-    setTimeout(function() {
-        res.json({
-            ok: true,
-            token
-        });
-    }, 1000);
 }
 
 function buildMenu(ROLE) {
@@ -126,7 +114,6 @@ function buildMenu(ROLE) {
 }
 
 module.exports = {
-    medicoLogin,
-    pacienteLogin,
-    renewToken
+    medicLogin,
+    patientLogin
 }

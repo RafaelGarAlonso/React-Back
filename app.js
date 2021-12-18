@@ -22,8 +22,8 @@ app.use( express.static('public') );
 
 // Rutas
 app.use( '/api/login', require('./routes/auth') );
-app.use( '/api/medicos', require('./routes/medicos') );
-app.use( '/api/pacientes', require('./routes/pacientes') );
+app.use( '/api/medics', require('./routes/medics') );
+app.use( '/api/patients', require('./routes/patients') );
 
 app.listen( process.env.PORT, () => {
   console.log('Servidor corriendo en puerto ' + process.env.PORT );

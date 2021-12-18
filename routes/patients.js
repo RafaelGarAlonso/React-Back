@@ -1,35 +1,35 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { validarCampos } = require('../middlewares/validar-campos');
-const { getMedicos, crearMedico, actualizarMedico, borrarMedico } = require('../controllers/medicos');
-const { validarJWT } = require('../middlewares/validar-jwt');
+const { validateFields } = require('../middlewares/validate-fields');
+const { getPatient, createPatient, updatePatient, deletePatient } = require('../controllers/patients');
+const { validateJWT } = require('../middlewares/validate-jwt');
 const router = Router();
 
-router.get( '/', validarJWT , getMedicos );
+router.get( '/', validateJWT , getPatient );
 
 router.post( '/',
     [
         check('name', 'El nombre es obligatorio').not().isEmpty(),
         check('password', 'El password es obligatorio').not().isEmpty(),
         check('email', 'El email es obligatorio').isEmail(),
-        validarCampos,
+        validateFields,
     ], 
-    crearMedico 
+    createPatient 
 );
 
 router.put( '/:id',
     [
-        validarJWT,
+        validateJWT,
         check('name', 'El nombre es obligatorio').not().isEmpty(),
         check('email', 'El email es obligatorio').isEmail(),
-        validarCampos,
+        validateFields,
     ],
-    actualizarMedico
+    updatePatient
 );
 
 router.delete( '/:id',
-    validarJWT,
-    borrarMedico
+    validateJWT,
+    deletePatient
 );
 
 module.exports = router;
